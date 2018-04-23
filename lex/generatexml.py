@@ -1,6 +1,5 @@
-from lexicon import entry,constituent,component,realization
+from lex.lexicon import entry,constituent,component,realization
 from xml.dom.minidom import Document
-import sys
 
 
 def getnode(att:str,val:str,doc:Document):

@@ -1,8 +1,8 @@
-from lg import DET
+from lex.lg import DET
 POSS='Poss'
 NUM='Num'
 MODIF='Modif'
-from lexicon import CECOMPL,COMPL
+from lex.lexicon import CECOMPL,COMPL
 
 
 def post_processing_args(ent):

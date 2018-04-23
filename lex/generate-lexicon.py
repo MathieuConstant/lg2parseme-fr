@@ -1,11 +1,10 @@
 # Generate lexicon
 
-import sys
-from lg import FreeConstituentDistribution,EntryProperty,IDProperty, AdjPermutProperty, PpvProperty, DetPlurielProperty,DetDistribProperty,PassiveProperty
-from lexicon import entry,compoalts
-from utils import post_processing
+from lex.lg import FreeConstituentDistribution,EntryProperty,IDProperty, AdjPermutProperty, PpvProperty, DetPlurielProperty,DetDistribProperty,PassiveProperty
+from lex.lexicon import entry
+from lex.utils import post_processing
 from xml.dom.minidom import Document
-from generatexml import entry2xmlelement
+from lex.generatexml import entry2xmlelement
 
 
 import argparse
