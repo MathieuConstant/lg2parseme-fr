@@ -16,11 +16,17 @@ def tokenize(seq):
     return seq.split(" ")
 
 
+def get_property_value(default_value,value):
+    if default_value is not None:
+        return default_value
+    return value
+
 
 class LGProperty:
-    def __init__(self, name,table=None):
+    def __init__(self, name,table=None,value=None):
         self.name = name
         self.table = table #optional
+        self.value = value #optional: if constant property over the current table
 
 
     def apply(self, entry, value):
@@ -45,8 +51,8 @@ class LGProperty:
 
 
 class FreeConstituentDistribution(LGProperty):
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None, value=value)
         if(not FreeConstituentDistribution.isOfType(self.name,table=None)):
             raise RuntimeError('Is not a Free constituent distribution property')
         self.index = self.getIndex() # if N0 =: Nhum then 0
@@ -96,6 +102,8 @@ class FreeConstituentDistribution(LGProperty):
         :param value: the value of the property
         :return: None
         '''
+
+        value = get_property_value(self.value,value)
         const = entry.frame.get_arg(self.index)
         value = get_value(value)
         if value is not None and value:
@@ -107,8 +115,8 @@ FreeN1Tables=['C_anp2']
 class IDProperty(LGProperty):
 
     #used for general properties true for the whole table
-    def __init__(self,table):
-        LGProperty.__init__(self, '', table=table)
+    def __init__(self,table,value=None):
+        LGProperty.__init__(self, '', table=table, value = value)
 
     def apply(self, entry, value):
         '''
@@ -118,6 +126,7 @@ class IDProperty(LGProperty):
         :param value: the value of the property
         :return: None
         '''
+        value = get_property_value(self.value,value)
         entry.id += '_'+value
         for const in entry.frame.args:
             if const is not None and not const.has_realizations():
@@ -138,8 +147,8 @@ class IDProperty(LGProperty):
 
 class EntryProperty(LGProperty):
 
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None, value=value)
         if(not EntryProperty.isOfType(self.name,table=None)):
             raise RuntimeError('Is not a ENT<> property')
         self.pos = self.getPos() # if <ENT>Det1 then Det # if <ENT><faire> then V
@@ -178,6 +187,7 @@ class EntryProperty(LGProperty):
             const = entry.frame.get_arg(int(self.index))
         else:
             const = entry.frame.get_head()
+        value = get_property_value(self.value, value)
         value = get_value(value)
         if value is not None and isinstance(value,str):
             items = tokenize(value)
@@ -211,8 +221,8 @@ class EntryProperty(LGProperty):
 
 class PpvProperty(LGProperty):
 
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None,value=value)
         if(not PpvProperty.isOfType(self.name,table=None)):
             raise RuntimeError('Is not a Ppv property')
         self.ppv = self.name[7:]
@@ -232,6 +242,7 @@ class PpvProperty(LGProperty):
         '''
 
         const = entry.frame.get_head()
+        value = get_property_value(self.value, value)
         value = get_value(value)
         if value is not None and value:
             if self.ppv.endswith(' figé'):
@@ -260,8 +271,8 @@ class PpvProperty(LGProperty):
 
 class AdjPermutProperty(LGProperty):
 
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None,value=value)
         if(not AdjPermutProperty.isOfType(self.name,table=None)):
             raise RuntimeError('Is not an Andj Permut property')
         #self.pos = self.getPos() # if <ENT>Det1 then Det # if <ENT><faire> then V
@@ -291,6 +302,7 @@ class AdjPermutProperty(LGProperty):
             if self.index == 'c':
                 self.index = '1'
             const = entry.frame.get_arg(int(self.index))
+            value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
                adj = [(i,c) for i,c in enumerate(const.seq) if c.pos == 'Adj'][0]
@@ -323,8 +335,8 @@ class AdjPermutProperty(LGProperty):
 
 class DetPlurielProperty(LGProperty):
 
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None,value=value)
         if(not DetPlurielProperty.isOfType(self.name,table=None)):
             raise RuntimeError('Is not an Det plurial property')
 
@@ -354,6 +366,7 @@ class DetPlurielProperty(LGProperty):
             if self.index == 'c':
                 self.index = '1'
             const = entry.frame.get_arg(int(self.index))
+            value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
                #print([str(c) for c in const.seq])
@@ -387,8 +400,8 @@ class DetPlurielProperty(LGProperty):
 
 class DetDistribProperty(LGProperty):
 
-    def __init__(self, name):
-        LGProperty.__init__(self,name,table=None)
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None,value=value)
         if(not DetDistribProperty.isOfType(self.name,table=None)):
             raise RuntimeError('Is not a Det distribution property')
 
@@ -426,6 +439,7 @@ class DetDistribProperty(LGProperty):
             if self.index == 'c':
                 self.index = '1'
             const = entry.frame.get_arg(int(self.index))
+            value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
 
@@ -456,8 +470,8 @@ class DetDistribProperty(LGProperty):
 
 class PassiveProperty(LGProperty):
 
-    def __init__(self, name):
-            LGProperty.__init__(self, name, table=None)
+    def __init__(self, name,value=None):
+            LGProperty.__init__(self, name, table=None, value=value)
             if (not PassiveProperty.isOfType(self.name, table=None)):
                 raise RuntimeError('Is not passive property')
 
@@ -474,6 +488,7 @@ class PassiveProperty(LGProperty):
             :param value: the value of the property
             :return: None
             '''
+            value = get_property_value(self.value, value)
             value = get_value(value)
 
             entry.properties['passive']=value

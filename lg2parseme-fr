@@ -1,5 +1,7 @@
 for i in `ls tables/figees/*.csv` 
 do
   echo $i
-  python3 -m lex.generate-lexicon $i tmp
+  python3 -m lex.generate-lexicon $i tmp tdt-figees/tdt-figees.csv
 done
+
+

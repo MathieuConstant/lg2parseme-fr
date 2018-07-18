@@ -290,12 +290,19 @@ class entry:
         i = 0
         for p in properties:
             if p is not None:
-               p.apply(self,raw_entry[i].strip())
+                val = ''
+                if i < len(raw_entry):
+                    val = raw_entry[i].strip()
+                p.apply(self,val)
+
             i += 1
         i = 0
         for p in properties2:
             if p is not None:
-                p.apply(self, raw_entry[i].strip())
+              val = ''
+              if i < len(raw_entry):
+                val = raw_entry[i].strip()
+              p.apply(self, val)
             i += 1
 
 
