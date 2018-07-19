@@ -305,9 +305,17 @@ class AdjPermutProperty(LGProperty):
             value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
-               adj = [(i,c) for i,c in enumerate(const.seq) if c.pos == 'Adj'][0]
+               #print("======",const.seq)
+               adj = [(i,c) for i,c in enumerate(const.seq) for x in c.get_compset() if x.pos == 'Adj']
+               if len(adj) <=0:
+                   return
+               adj = adj[0]
+               #print("======", adj)
                if adj is not None:
-                  noun = [(i,c) for i,c in enumerate(const.seq) if c.pos == 'C'][0]
+                  noun = [(i,c) for i,c in enumerate(const.seq) for x in c.get_compset() if x.pos == 'C']
+                  if len(noun) <= 0:
+                      return
+                  noun = noun[0]
                   if noun is not None:
                      const.seq[noun[0]] = adj[1]
                      const.seq[adj[0]] = noun[1]

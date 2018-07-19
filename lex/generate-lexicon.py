@@ -10,6 +10,16 @@ from lex.generatexml import entry2xmlelement
 import argparse
 import os
 
+def property_is_already_in_properties(prop,properties):
+    for lg in properties:
+        if lg is not None:
+            if lg.name == prop:
+                return True
+    return False
+
+def property_is_already_in_all_properties(prop,properties, properties2):
+    return property_is_already_in_properties(prop,properties) or property_is_already_in_properties(prop,properties2)
+
 
 #property prop, list of properties to apply in first and second place
 def process_titles_for_fixed(prop, properties,properties2,value=None):
@@ -53,22 +63,28 @@ def get_colomn_index(titles, table):
 
 
 def find_index(tab,value):
-    indexes = [index for index in range(len(tab)) if tab[index] == 'à']
+    indexes = [index for index in range(len(tab)) if tab[index] == value]
     if len(indexes) <= 0:
         return None
     return indexes[0]
 
+
+def get_preposition(tab,prep):
+    i = find_index(tab, prep)
+    if i is not None:
+        n = tab[i + 1]
+        if len(n) == 2 and n[0] == 'N':
+            return ('<ENT>Prép' + n[1], prep)
+    return (None, None)
+
 def get_property_name_and_value(prop):
     tab = prop.split(' ')
     print(tab)
+    (p,v) = get_preposition(tab,'à')
+    if p is None:
+        (p, v) = get_preposition(tab, 'de')
+    return (p,v)
 
-    i = find_index(tab,'à')
-    if i is not None:
-        n = tab[i+1]
-        if len(n) == 2 and n[0] == 'N':
-            return ('<ENT>Prép'+n[1],'à')
-    return (None,None)
-        #tab[i+1]+' =: à'
 
 def add_properties_from_table_of_tables(filename, properties, properties2, table):
     f = open(filename)
@@ -91,8 +107,9 @@ def add_properties_from_table_of_tables(filename, properties, properties2, table
            p = prop[1][1:-1]
            (p,v) = get_property_name_and_value(p)
 
-           if p is not None:
-               #print(p,v)
+           if p is not None and not property_is_already_in_all_properties(p,properties,properties2):
+               print(p,v)
+
                process_titles_for_fixed(p, properties, properties2,value=v)
         i += 1
     #for prop in titles:
