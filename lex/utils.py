@@ -2,6 +2,8 @@ from lex.lg import DET
 POSS='Poss'
 NUM='Num'
 MODIF='Modif'
+
+
 from lex.lexicon import CECOMPL,COMPL
 
 

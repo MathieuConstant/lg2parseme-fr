@@ -196,7 +196,7 @@ class constituent:
         indent3 = indent*3
 
         s = indent+'(VERB\n'
-        if self.id >= 0:
+        if self.id != -1:
            s = indent+'('+str(self.id)+'\n'
 
         if len(self.properties) != 0:
@@ -234,12 +234,16 @@ class frame:
         self.head = None # syntactic lexical head
         self.args = [] # syntactic arguments (constituents)
         self.families = [] #corresponding family names in xmg grammar
+        self.indexes = {'0':0,'n':1,'1':2,'c':3,'2':4,'3':5}
 
     def get_arg(self, index):
+        #print('----',index,self.indexes)
+        oldindex = index
+        index = self.indexes[index]
         if len(self.args) <= index:
             self.args =self.args + [None]*(index + 1)
         if self.args[index] is None:
-            self.args[index] = constituent(index)
+            self.args[index] = constituent(oldindex)
         return self.args[index]
 
     def get_head(self):
@@ -288,6 +292,7 @@ class entry:
         '''
 
         i = 0
+        #print(properties,properties2)
         for p in properties:
             if p is not None:
                 val = ''

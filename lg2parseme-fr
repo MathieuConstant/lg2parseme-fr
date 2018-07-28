@@ -1,7 +1,16 @@
+for i in `ls tables/noms-predicatifs/*.csv` 
+do
+  echo $i
+  python3 -m lex.generate-lexicon $i tmp tables/tdt-noms-predicatifs/tdt-noms-predicatifs.csv lvc
+done
+
+exit 1
+
 for i in `ls tables/figees/*.csv` 
 do
   echo $i
-  python3 -m lex.generate-lexicon $i tmp tdt-figees/tdt-figees.csv
+  python3 -m lex.generate-lexicon $i tmp tables/tdt-figees/tdt-figees.csv
 done
+
 
 

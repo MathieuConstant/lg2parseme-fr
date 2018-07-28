@@ -1,3 +1,7 @@
+
+FIXED='fixed'
+LVC='lvc'
+
 EPSILON='<E>'
 DET = 'Det'
 
@@ -60,7 +64,7 @@ class FreeConstituentDistribution(LGProperty):
 
 
     def getIndex(self):
-        return int(self.name[1])
+        return self.name[1]
 
     def getRea(self):
         return self.name.split('=: ')[1]
@@ -115,8 +119,9 @@ FreeN1Tables=['C_anp2']
 class IDProperty(LGProperty):
 
     #used for general properties true for the whole table
-    def __init__(self,table,value=None):
+    def __init__(self,table,mwetype,value=None):
         LGProperty.__init__(self, '', table=table, value = value)
+        self.mwetype = mwetype
 
     def apply(self, entry, value):
         '''
@@ -128,8 +133,9 @@ class IDProperty(LGProperty):
         '''
         value = get_property_value(self.value,value)
         entry.id += '_'+value
+        entry.properties["mwetype"] = self.mwetype
         for const in entry.frame.args:
-            if const is not None and not const.has_realizations():
+            if self.mwetype == FIXED and const is not None and not const.has_realizations():
                const.add_property("fixed",True)
 
 
@@ -153,17 +159,23 @@ class EntryProperty(LGProperty):
             raise RuntimeError('Is not a ENT<> property')
         self.pos = self.getPos() # if <ENT>Det1 then Det # if <ENT><faire> then V
         self.index = self.getIndex()  # if <ENT>Det1 then '1' # if <ENT><faire> then None
+        #is_lexicalized_verb: rule=<ENT><.*>
+        #or is component of a constituent i: two possible forms <ENT>.*i or <ENT>
 
 
     def getIndex(self):
-        if self.name[-1] in '0123456789c':
+        if self.name[-1] == '>' and self.name[5] == '<':
+            return None
+        if self.name[-1] in '0123456789cv':
             return self.name[-1]
-        return None
+        return 'n'
 
     def getPos(self):
-        if self.name[-1] in '0123456789c':
+        if self.name[-1] == '>' and self.name[5] == '<':
+            return 'V'
+        if self.name[-1] in '0123456789cv':
             return self.name[5:-1]
-        return 'V'
+        return self.name[5:]
 
 
     def __str__(self):
@@ -182,9 +194,9 @@ class EntryProperty(LGProperty):
         :return: None
         '''
         if self.index != None:
-            if self.index == 'c':
-                self.index = '1'
-            const = entry.frame.get_arg(int(self.index))
+            #if self.index == 'c':
+            #    self.index = '1'
+            const = entry.frame.get_arg(self.index)
         else:
             const = entry.frame.get_head()
         value = get_property_value(self.value, value)
@@ -215,6 +227,58 @@ class EntryProperty(LGProperty):
 
         # Handle Ppv in an other type of prperty
         if not name.startswith('<ENT>') or name == '<ENT>Ppv':
+            return False
+        return True
+
+
+
+class VsupProperty(LGProperty):
+
+    def __init__(self, name,value=None):
+        LGProperty.__init__(self,name,table=None, value=value)
+        if(not VsupProperty.isOfType(self.name,table=None)):
+            raise RuntimeError(name + ' is not a Vsup property')
+        self.verb = self.getVerb() # if Vsup =: faire then verb=faire
+
+
+
+    def getVerb(self):
+        return self.name[8:]
+
+
+    def __str__(self):
+        return 'support verb:' + self.verb
+
+
+    def apply(self, entry, value):
+        '''
+        apply on current lexical entry the property with the value value
+
+        :param entry: the current lexical entry
+        :param value: the value of the property
+        :return: None
+        '''
+
+        const = entry.frame.get_head()
+        value = get_property_value(self.value, value)
+        value = get_value(value)
+        if value is not None and value:
+               const.add_component({'word':self.verb, 'pos':'V'})
+
+
+
+
+    @staticmethod
+    def isOfType(name, table=None):
+        '''
+        test whether the name of th property is of the form <ENT>X
+        :param name: name of the property to be tested
+        :param table: table (optional)
+        :return: boolean whether the property name (in table table optionaly) is of the current property type
+        '''
+
+        # Handle Ppv in an other type of prperty
+        if not name.startswith('Vsup =: '):
             return False
         return True
 
@@ -299,9 +363,9 @@ class AdjPermutProperty(LGProperty):
         '''
 
         if self.index != None:
-            if self.index == 'c':
-                self.index = '1'
-            const = entry.frame.get_arg(int(self.index))
+            #if self.index == 'c':
+            #    self.index = '1'
+            const = entry.frame.get_arg(self.index)
             value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
@@ -371,9 +435,9 @@ class DetPlurielProperty(LGProperty):
         '''
 
         if self.index != None:
-            if self.index == 'c':
-                self.index = '1'
-            const = entry.frame.get_arg(int(self.index))
+            #if self.index == 'c':
+            #    self.index = '1'
+            const = entry.frame.get_arg(self.index)
             value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
@@ -444,9 +508,9 @@ class DetDistribProperty(LGProperty):
         '''
 
         if self.index is not None and self.rea is not None:
-            if self.index == 'c':
-                self.index = '1'
-            const = entry.frame.get_arg(int(self.index))
+            #if self.index == 'c':
+            #    self.index = '1'
+            const = entry.frame.get_arg(self.index)
             value = get_property_value(self.value, value)
             value = get_value(value)
             if value is not None and value:
